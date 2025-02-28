@@ -15,7 +15,7 @@ The application uses websockets to send messages between clients.
 
 ## Security
 
-The application uses Spring Security to secure the endpoints. Users need to be authenticated to access the chat.
+The application uses Spring Security to secure the api endpoints. Users need to be authenticated to access the chat.
 
 ## Running the application
 
