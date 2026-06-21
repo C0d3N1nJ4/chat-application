@@ -2,7 +2,25 @@
 <html>
 <head>
   <title>WebSocket Chat Application</title>
-  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; }
+    .container { max-width: 860px; margin: 24px auto; padding: 0 16px; }
+    .chat-container { background: #fff; border: 1px solid #dde2ec; border-radius: 12px; overflow: hidden; }
+    .chat-header { padding: 16px 20px; border-bottom: 1px solid #eef2f8; }
+    .chat-header h2 { margin: 0; font-size: 20px; }
+    .connecting { padding: 8px 20px; color: #6b7280; font-size: 14px; }
+    .hidden { display: none; }
+    .history-title { margin: 0; padding: 0 20px 10px; color: #4b5563; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .message-area { list-style: none; margin: 0; padding: 0 20px 12px; max-height: 460px; overflow-y: auto; }
+    .message-area li { margin-bottom: 10px; padding: 10px 12px; border: 1px solid #ebeff5; border-radius: 10px; }
+    .chat-message .nickname { margin-right: 8px; }
+    .event-message { background: #fafbff; color: #4b5563; }
+    .message-meta { display: block; color: #6b7280; font-size: 12px; margin-bottom: 4px; }
+    .form-group { display: flex; gap: 8px; padding: 14px 20px 20px; border-top: 1px solid #eef2f8; }
+    .form-control { flex: 1; padding: 10px 12px; border: 1px solid #ccd5e3; border-radius: 8px; }
+    .send-btn { border: none; border-radius: 8px; padding: 0 18px; background: #1f4ed8; color: #fff; cursor: pointer; }
+    .send-btn:hover { background: #1d44bb; }
+  </style>
 </head>
 <body>
 <div id="chat-page" class="container">
@@ -11,6 +29,7 @@
       <h2>Spring WebSocket Chat</h2>
     </div>
     <div class="connecting">Connecting...</div>
+    <p class="history-title">Message History</p>
     <ul id="messageArea" class="message-area"></ul>
     <form id="messageForm" name="messageForm">
       <div class="form-group">
@@ -22,6 +41,6 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.3.0/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-<script src="/js/main.js"></script>
+<script src="/main.js"></script>
 </body>
 </html>

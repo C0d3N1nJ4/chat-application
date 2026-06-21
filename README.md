@@ -13,14 +13,36 @@ Configuration properties can be found in the `application.properties` file.
 
 The application uses websockets to send messages between clients.
 
-## Security
+## Planned features
 
-The application uses Spring Security to secure the api endpoints. Users need to be authenticated to access the chat.
+- Security (future implementation)
+
+## Pre-conditions
+
+Before running this project, make sure the following are available:
+
+- Linux/macOS shell (or WSL on Windows)
+- Java 21+ available on PATH (Gradle must run on Java 17+)
+- Gradle 9.x installed globally (this repository does not include a Gradle wrapper)
+- Internet access for dependency/toolchain resolution on first build
+
+Recommended environment for this repository:
+
+```bash
+export JAVA_HOME=/usr/local/sdkman/candidates/java/21.0.10-ms
+export PATH=$JAVA_HOME/bin:$PATH
+```
 
 ## Running the application
 
-To run the application, you can use the following command:
+To run the application, use:
 
-```bash 
-./gradlew bootRun
+```bash
+gradle bootRun
+```
+
+To run tests:
+
+```bash
+gradle test
 ```
