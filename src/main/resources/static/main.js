@@ -8,6 +8,9 @@ var connectingElement = document.querySelector('.connecting');
 var stompClient = null;
 var username = 'guest-' + Math.floor(Math.random() * 10000);
 var messageHistory = [];
+var historyLoaded = false;
+var pendingMessages = [];
+var displayedMessageIds = new Set();
 
 function connect() {
     var socket = new SockJS('/chat-websocket');
@@ -19,6 +22,25 @@ function connect() {
 function onConnected() {
     // Subscribe to the Public Topic
     stompClient.subscribe('/topic/public', onMessageReceived);
+
+    fetch('/api/messages')
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('History request failed: HTTP ' + response.status);
+            }
+            return response.json();
+        })
+        .then(function(messages) {
+            messages.forEach(appendMessage);
+            finishHistoryLoad();
+        })
+        .catch(function(error) {
+            console.error('Could not load message history', error);
+            connectingElement.textContent = 'Could not load message history. Live messages are still available; refresh to retry.';
+            connectingElement.style.color = 'red';
+            connectingElement.classList.remove('hidden');
+            finishHistoryLoad();
+        });
 
     // Tell your username to the server
     stompClient.send("/app/chat.addUser",
@@ -53,6 +75,26 @@ function sendMessage(event) {
 
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
+    if (!historyLoaded) {
+        pendingMessages.push(message);
+        return;
+    }
+    appendMessage(message);
+}
+
+function finishHistoryLoad() {
+    historyLoaded = true;
+    pendingMessages.sort(function(a, b) { return a.id - b.id; }).forEach(appendMessage);
+    pendingMessages = [];
+}
+
+function appendMessage(message) {
+    if (message.id != null) {
+        if (displayedMessageIds.has(message.id)) {
+            return;
+        }
+        displayedMessageIds.add(message.id);
+    }
     messageHistory.push(message);
     renderMessage(message);
     messageArea.scrollTop = messageArea.scrollHeight;

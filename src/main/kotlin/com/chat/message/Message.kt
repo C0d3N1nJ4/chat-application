@@ -2,6 +2,7 @@ package com.chat.message
 
 class Message {
 
+    var id: Long? = null
     var type: MessageType? = null
     var content: String? = null
     var sender: String? = null

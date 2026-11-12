@@ -7,13 +7,13 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor
 import org.springframework.stereotype.Controller
 
 @Controller
-class MessageController {
+class MessageController(private val repository: MessageRepository) {
 
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
     fun sendMessage(message: Message): Message {
         ensureTimestamp(message)
-        return message
+        return repository.save(message)
     }
 
     @MessageMapping("/chat.addUser")
@@ -23,7 +23,7 @@ class MessageController {
         message.sender?.let { sender ->
             headerAccessor.sessionAttributes?.put("username", sender)
         }
-        return message
+        return repository.save(message)
     }
 
     private fun ensureTimestamp(message: Message) {

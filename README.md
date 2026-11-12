@@ -8,7 +8,7 @@ A WebSocket chat application built with **Spring Boot 4.0** and **Kotlin**.
 - ✅ Built with Kotlin for type safety and conciseness
 - ✅ Spring Boot with reactive capabilities
 - ✅ Clean separation of concerns (Controller, Config, Message models)
-- ✅ H2 in-memory database
+- ✅ Persistent message history in SQLite with a Redis cache
 - ✅ Responsive web UI with separate CSS styling
 
 ## Architecture
@@ -16,7 +16,7 @@ A WebSocket chat application built with **Spring Boot 4.0** and **Kotlin**.
 - **Backend**: Spring Boot 4.0 + Kotlin
 - **Frontend**: Thymeleaf templates + HTML/CSS/JavaScript
 - **WebSocket**: SockJS + STOMP protocol
-- **Database**: H2 in-memory
+- **Database**: SQLite (durable storage), Redis (recent-history cache)
 - **Build**: Gradle
 
 ## Project Structure
@@ -26,22 +26,27 @@ src/
 ├── main/
 │   ├── kotlin/com/chat/
 │   │   ├── ChatApplication.kt       # Main Spring Boot application
+│   │   ├── HomeController.kt        # Index page routing
 │   │   ├── config/
 │   │   │   └── WebSocketConfig.kt   # WebSocket configuration
-│   │   ├── controller/
-│   │   │   ├── MessageController.kt # WebSocket message handler
-│   │   │   └── HomeController.kt    # Index page routing
 │   │   └── message/
-│   │       └── Message.kt           # Message model
+│   │       ├── Message.kt           # Message model
+│   │       ├── MessageType.kt       # Chat and presence event types
+│   │       ├── MessageController.kt # Persist and broadcast WebSocket messages
+│   │       ├── MessageRepository.kt # SQLite persistence
+│   │       ├── MessageHistory.kt    # Redis-backed recent history
+│   │       └── MessageHistoryController.kt # History HTTP endpoint
 │   └── resources/
 │       ├── templates/
 │       │   └── index.html           # Web UI
 │       ├── static/
 │       │   ├── styles.css           # Stylesheet
 │       │   └── main.js              # Client-side logic
-│       └── application.properties    # Configuration
+│       ├── schema.sql               # SQLite schema initialization
+│       └── application.properties   # Configuration
 └── test/
-    └── kotlin/                      # Unit and integration tests
+    ├── kotlin/                     # Unit and integration tests
+    └── javascript/                 # Client history tests
 ```
 
 ## Pre-conditions
@@ -50,6 +55,7 @@ Before running this project, ensure you have:
 
 - **JDK 25** (required by the Gradle Java toolchain)
 - **Gradle 9.x** installed globally
+- **Docker Compose** for the optional local Redis cache, or an existing Redis server
 - Linux/macOS or WSL on Windows
 
 ### Recommended Setup
@@ -63,7 +69,10 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 ### Run with Gradle
 
+Start the local Redis cache, then run the application:
+
 ```bash
+docker compose up -d redis
 gradle bootRun
 ```
 
@@ -75,15 +84,44 @@ The application will start on `http://localhost:8080`
 gradle test
 ```
 
+The client history-loading tests use Node.js's built-in test runner (Node.js 18+):
+
+```bash
+node --test src/test/javascript/main.test.js
+```
+
 ## Configuration
 
 Application settings can be modified in `src/main/resources/application.properties`:
 
 ```properties
 server.port=8080
-spring.datasource.url=jdbc:h2:mem:testdb
-spring.h2.console.enabled=true
+spring.datasource.url=${CHAT_DATABASE_URL:jdbc:sqlite:chat.db}
+spring.data.redis.host=${REDIS_HOST:localhost}
+spring.data.redis.port=${REDIS_PORT:6379}
 ```
+
+### Message persistence
+
+Chat messages and join events are stored in `chat.db` in the working directory
+before being broadcast. This file is ignored by Git; keep it to preserve history
+across application restarts. To move it, set `CHAT_DATABASE_URL` to a SQLite JDBC
+URL such as `jdbc:sqlite:/absolute/path/chat.db` (the parent directory must exist).
+
+On connection, the browser loads the latest 100 messages from `GET /api/messages`
+in chronological order and merges them with live messages without duplicates.
+SQLite retains all messages; the 100-message limit only applies to history reads.
+
+Redis caches history for 60 seconds. Cache keys include a database-specific
+namespace and the latest persisted message ID so separate databases do not share
+history and new writes do not reuse older history. Redis is not the source of
+truth: cache failures are logged and history falls back to SQLite. Database
+failures are not hidden, and messages that fail to persist are not broadcast.
+The cache does not need a persistent volume.
+
+Stop the local cache with `docker compose down`. If using an external Redis
+server, configure `REDIS_HOST`, `REDIS_PORT`, and, if needed, Spring's
+`spring.data.redis.password` property through your environment.
 
 ## WebSocket Configuration
 
@@ -126,10 +164,10 @@ For IntelliJ IDEA:
 ## Planned Features
 
 - [ ] User authentication and authorization
-- [ ] Message persistence
+- [x] Message persistence
 - [ ] User profiles
 - [ ] Private messaging
-- [ ] Message history
+- [x] Recent message history
 
 ## Technologies
 
@@ -138,8 +176,12 @@ For IntelliJ IDEA:
 | Spring Boot | 4.0.0 | Web framework |
 | Kotlin | 2.2.0 | Language |
 | Gradle | 9.x | Build tool |
-| H2 Database | Latest | In-memory DB |
-| SockJS | 1.3.0 | WebSocket fallback |
+| SQLite JDBC | 3.50.3.0 | Persistent message storage |
+| Redis | 7.4 (local Compose) | Recent-history cache |
+docker compose up -d redis
+gradle bootRundocker compose up -d redis
+gradle bootRundocker compose up -d redis
+gradle bootRun| SockJS | 1.3.0 | WebSocket fallback |
 | STOMP | 2.3.3 | Message protocol |
 
 ## License
