@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in - Chat Application</title>
+  <link rel="stylesheet" href="/styles.css" th:href="@{/styles.css}">
+</head>
+<body>
+<main class="container login-container">
+  <section class="chat-container login-card" aria-labelledby="login-title">
+    <h1 id="login-title">Welcome to Chat</h1>
+    <p>Sign in to join the public chat and send private messages.</p>
+    <p class="login-error" role="alert" th:if="${param.error != null}">
+      GitHub sign-in failed. Please try again.
+    </p>
+    <p class="login-status" role="status" th:if="${param.logout != null}">
+      You have been signed out.
+    </p>
+    <a class="github-sign-in" href="/oauth2/authorization/github" th:href="@{/oauth2/authorization/github}">
+      Sign in with GitHub
+    </a>
+    <p class="login-note">Your GitHub password is never shared with this application.</p>
+  </section>
+</main>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>WebSocket Chat Application</title>
   <link rel="stylesheet" href="/styles.css">
@@ -9,13 +9,27 @@
   <div class="chat-container">
     <div class="chat-header">
       <h2>Spring WebSocket Chat</h2>
+      <p>Signed in as <strong id="currentUser"></strong></p>
+      <form action="/logout" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Sign out</button>
+      </form>
     </div>
     <div class="connecting">Connecting...</div>
+    <div class="conversation-picker">
+      <label for="recipient">Conversation</label>
+      <select id="recipient">
+        <option value="">Public chat</option>
+      </select>
+      <button id="refreshUsers" type="button">Refresh users</button>
+    </div>
+    <p id="chatStatus" class="chat-status" role="status"></p>
     <p class="history-title">Message History</p>
     <ul id="messageArea" class="message-area"></ul>
+    <ul id="privateMessageArea" class="message-area hidden"></ul>
     <form id="messageForm" name="messageForm">
       <div class="form-group">
-        <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control" />
+        <input type="text" id="message" placeholder="Type a message..." autocomplete="off" maxlength="4000" class="form-control" />
         <button type="submit" class="send-btn">Send</button>
       </div>
     </form>

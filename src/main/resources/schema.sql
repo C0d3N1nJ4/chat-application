@@ -11,3 +11,18 @@ CREATE TABLE IF NOT EXISTS messages (
     sender TEXT,
     timestamp TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    username TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS private_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender_id TEXT NOT NULL REFERENCES users(id),
+    recipient_id TEXT NOT NULL REFERENCES users(id),
+    content TEXT NOT NULL,
+    timestamp TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS private_messages_participants
+    ON private_messages(sender_id, recipient_id, id);
