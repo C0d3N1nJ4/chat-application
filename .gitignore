@@ -1,0 +1,53 @@
+# Gradle
+.gradle/
+.kotlin/
+build/
+out/
+*.gradle.kts.bak
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+*.swp
+*.swo
+*~
+.DS_Store
+.vscode/
+*.code-workspace
+
+# Build
+bin/
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+# Runtime
+*.log
+*.pid
+*.seed
+
+# Dependencies
+.gradle
+.m2/
+node_modules/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Application specific
+spring.log
