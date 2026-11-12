@@ -94,6 +94,19 @@ WebSocket is configured in `WebSocketConfig.kt` with:
 
 ## Development
 
+### Spring Boot DevTools
+
+DevTools is enabled for `gradle bootRun` and excluded from the packaged application.
+It restarts the application when compiled classes change. After editing Kotlin
+sources, compile them from another terminal:
+
+```bash
+gradle classes
+```
+
+DevTools also disables template caching during development and provides a
+LiveReload server for browsers with a LiveReload extension.
+
 ### Code Quality
 
 The project uses:
