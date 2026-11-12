@@ -19,6 +19,17 @@ A WebSocket chat application built with **Spring Boot 4.0** and **Kotlin**.
 - **Database**: SQLite (durable storage), Redis (recent-history cache)
 - **Build**: Gradle
 
+The project is organized by feature with simple layers:
+
+- Controllers handle HTTP and WebSocket requests.
+- `MessageService` coordinates message persistence, timestamps, and history reads.
+- `MessageRepository` contains SQLite queries.
+- `MessageHistoryCache` handles Redis caching and cache-failure fallback.
+
+The dependency flow is **Controller → Service → Repository / Cache**. Message
+functionality stays together in the `message` package; page routing lives in `web`
+and shared WebSocket configuration lives in `config`.
+
 ## Project Structure
 
 ```
@@ -26,15 +37,17 @@ src/
 ├── main/
 │   ├── kotlin/com/chat/
 │   │   ├── ChatApplication.kt       # Main Spring Boot application
-│   │   ├── HomeController.kt        # Index page routing
+│   │   ├── web/
+│   │   │   └── HomeController.kt    # Index page routing
 │   │   ├── config/
 │   │   │   └── WebSocketConfig.kt   # WebSocket configuration
 │   │   └── message/
 │   │       ├── Message.kt           # Message model
 │   │       ├── MessageType.kt       # Chat and presence event types
-│   │       ├── MessageController.kt # Persist and broadcast WebSocket messages
+│   │       ├── MessageController.kt # WebSocket endpoints
+│   │       ├── MessageService.kt    # Persistence and history coordination
 │   │       ├── MessageRepository.kt # SQLite persistence
-│   │       ├── MessageHistory.kt    # Redis-backed recent history
+│   │       ├── MessageHistoryCache.kt # Redis history caching
 │   │       └── MessageHistoryController.kt # History HTTP endpoint
 │   └── resources/
 │       ├── templates/

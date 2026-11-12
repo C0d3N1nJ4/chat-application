@@ -1,34 +1,25 @@
 package com.chat.message
 
-import java.time.Instant
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor
 import org.springframework.stereotype.Controller
 
 @Controller
-class MessageController(private val repository: MessageRepository) {
+class MessageController(private val service: MessageService) {
 
     @MessageMapping("/chat.sendMessage")
     @SendTo("/topic/public")
     fun sendMessage(message: Message): Message {
-        ensureTimestamp(message)
-        return repository.save(message)
+        return service.save(message)
     }
 
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
     fun addUser(message: Message,headerAccessor: SimpMessageHeaderAccessor): Message {
-        ensureTimestamp(message)
         message.sender?.let { sender ->
             headerAccessor.sessionAttributes?.put("username", sender)
         }
-        return repository.save(message)
-    }
-
-    private fun ensureTimestamp(message: Message) {
-        if (message.timestamp.isNullOrBlank()) {
-            message.timestamp = Instant.now().toString()
-        }
+        return service.save(message)
     }
 }
